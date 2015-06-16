@@ -23,8 +23,29 @@ RUN curl -o wordpress.tar.gz -SL https://wordpress.org/wordpress-${WORDPRESS_UPS
 
 RUN curl -o w3_total_cache.zip -SL https://downloads.wordpress.org/plugin/w3-total-cache.${WORDPRESS_W3_TOTAL_CACHE_VERSION}.zip \
   && unzip w3_total_cache.zip -d /usr/src/wordpress/wp-content/plugins/ \
-  && rm w3_total_cache.zip \
-  && chown -R www-data:www-data /usr/src/wordpress
+  && rm w3_total_cache.zip
+
+RUN curl -o insert_php.zip -SL https://downloads.wordpress.org/plugin/insert-php.zip \
+  && unzip insert_php.zip -d /usr/src/wordpress/wp-content/plugins/ \
+  && rm insert_php.zip
+
+# Add base w3 cache config
+RUN mkdir /usr/src/wordpress/wp-content/w3tc-config
+COPY config/w3-total-cache-master.php /usr/src/wordpress/wp-content/w3tc-config/master.php
+
+RUN curl -o session_mgr.zip -SL https://downloads.wordpress.org/plugin/wp-session-manager.latest-stable.zip \
+  && unzip session_mgr.zip -d /usr/src/wordpress/wp-content/plugins/ \
+  && rm session_mgr.zip
+
+# Turn off canonical redirects for the sake of random container ports
+# http://marvintam.com/2009/05/wordpress-on-localhost-port-number/
+RUN curl -o disable_redirects.zip -SL https://downloads.wordpress.org/plugin/disable-canonical-url-redirects.zip \
+  && unzip disable_redirects.zip -d /usr/src/wordpress/wp-content/plugins/ \
+  && mv /usr/src/wordpress/wp-content/plugins/disable-canonical-url-redirects/disable_canonical_url_redirects/*.php /usr/src/wordpress/wp-content/plugins/disable-canonical-url-redirects/. \
+  && rm -Rf /usr/src/wordpress/wp-content/plugins/disable-canonical-url-redirects/disable_canonical_url_redirects \
+  && rm disable_redirects.zip
+
+RUN chown -R www-data:www-data /usr/src/wordpress
 
 COPY docker-entrypoint.sh /entrypoint.sh
 

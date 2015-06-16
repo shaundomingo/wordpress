@@ -87,6 +87,15 @@ set_config 'DB_USER' "$WORDPRESS_DB_USER"
 set_config 'DB_PASSWORD' "$WORDPRESS_DB_PASSWORD"
 set_config 'DB_NAME' "$WORDPRESS_DB_NAME"
 
+if [ -z "$WORDPRESS_ADMIN_ENABLED" ]; then
+	WORDPRESS_ADMIN_ENABLED=0
+fi
+
+if [ "$WORDPRESS_ADMIN_ENABLED" == "0" -o "$WORDPRESS_ADMIN_ENABLED" == "false" ]; then
+	printf "order deny,allow\ndeny from all" > wp-admin/.htaccess
+	chown www-data:www-data wp-admin/.htaccess
+fi
+
 # allow any of these "Authentication Unique Keys and Salts." to be specified via
 # environment variables with a "WORDPRESS_" prefix (ie, "WORDPRESS_AUTH_KEY")
 UNIQUES=(
